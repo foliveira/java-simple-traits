@@ -1,0 +1,83 @@
+<project name="PA project-1" default="create-jar" basedir=".">
+  <description>PAva's first project</description>
+
+  <property name="src.dir" location="src"/>
+  <property name="build.dir" location="build"/>
+  <property name="lib.dir" location="lib" />
+  <property name="archive.filename" value="traits" />
+  <property name="jar.filename" value="${archive.filename}.jar" />
+  <property name="zip.filename" value="${archive.filename}.zip" />
+
+  <path id="class.path.ref">
+    <fileset dir="${lib.dir}">
+      <include name="*.jar" />
+    </fileset>
+  </path>
+
+    <target name="prepare" description="Creates necessary directories for the building process">
+        <mkdir dir="${build.dir}"/>
+    </target>
+
+    <target name="clean" description="Removes any generated files">
+        <delete dir="${build.dir}"/>
+	<delete file="${jar.filename}"/>
+	<delete file="${zip.filename}"/>
+    </target>
+
+    <target name="compile" depends="prepare" description="Compiles the source code" >
+        <javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="class.path.ref"
+	       target="1.6" debug="on" includeantruntime="false"/>
+    </target>
+
+    <target name="create-jar" depends="compile" description="Generates the jar with the project classes">
+      <jar destfile="${archive.filename}.jar" basedir="${build.dir}" >
+	<manifest>
+	  <attribute name="Main-Class" value="pt.ist.meic.pava.RunWithTraits"/>
+	  <attribute name="Class-Path" value="${lib.dir}/javassist.jar"/>
+	</manifest>
+      </jar>
+    </target>
+
+    <!--    <property name="group.number" value="00"/> -->
+    <target name="create-zip" depends="clean" description="Creates deliverable ZIP, with all required files.">
+      <fail unless="group.number"
+	    message="group number is required to create deliverable ZIP.  Define it in build.xml or pass it as an option to ant with -Dgroup.number="/>
+      <fail message="presentation file 'p1.pdf' is required to create deliverable ZIP">
+	<condition>
+	  <not>
+            <available file="p1.pdf"/>
+	  </not>
+	</condition>
+      </fail>
+      
+      <fail message="all API classes must be in package 'pt.ist.meic.pava'">
+	<condition>
+	  <not>
+	    <and>
+	      <available filepath="${src.dir}/pt/ist/meic/pava" file="RunWithTraits.java"/>
+	      <available filepath="${src.dir}/pt/ist/meic/pava" file="Trait.java"/>
+	      <available filepath="${src.dir}/pt/ist/meic/pava" file="WithTraits.java"/>
+	      <available filepath="${src.dir}/pt/ist/meic/pava" file="WithAliasedTraits.java"/>
+	      <available filepath="${src.dir}/pt/ist/meic/pava" file="AliasedTrait.java"/>
+	    </and>
+	  </not>
+	</condition>
+      </fail>
+
+
+
+      <echo message="Packaging 'src' directory, 'build.xml' and 'p1.pdf' into directory 'group${group.number}' on ${zip.filename}"/>
+      <zip destfile="${zip.filename}" encoding="UTF8">
+	<zipfileset dir="${src.dir}" prefix="group${group.number}/src"/>
+	<zipfileset dir="." includes="build.xml,p1.pdf" prefix="group${group.number}"/>
+      </zip>
+    </target>
+
+    <!--    <property name="run.args" value="package.and.class.name arg1 arg2 arg3"/> -->
+    <target name="run" depends="create-jar" description="Runs the program" >
+      <fail unless="run.args" message="arguments must be passed using ant option -Drun.args="/>
+      <java jar="${jar.filename}" fork="true">
+	<arg line="${run.args}" />
+      </java>
+    </target>
+</project>
