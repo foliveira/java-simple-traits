@@ -1,9 +1,11 @@
 package pt.ist.meic.pava.demo;
 
 import pt.ist.meic.pava.Trait;
+import pt.ist.meic.pava.WithTraits;
 
 @Trait
-public abstract class TEquality extends TEquatable implements IEquality {
+@WithTraits({TEquatable.class})
+public abstract class TEquality implements IEquality {
 	public abstract boolean isEql(Object obj);
 	public boolean isNotEql(Object obj) { return !isEql(obj); }
 }
